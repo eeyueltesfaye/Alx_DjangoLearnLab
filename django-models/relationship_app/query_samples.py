@@ -22,7 +22,7 @@ def books_in_library(library_name):
 def librarian_for_library(library_name):
     library = Library.objects.get(name=library_name)
     # Use Librarian.objects.get() with the library
-    librarian = Librarian.objects.get(library=library)
+    librarian = Librarian.objects.get(library="library")
     return librarian
 
 # Sample usage
