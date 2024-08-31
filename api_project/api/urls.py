@@ -7,7 +7,9 @@ from rest_framework.authtoken.views import obtain_auth_token
 # Existing URL pattern for BookList view
 urlpatterns = [
     path('books/', BookList.as_view(), name='book-list'),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'), # for token authentication 
 ]
+
 
 # New router for BookViewSet
 router = DefaultRouter()
@@ -18,7 +20,3 @@ urlpatterns += [
 ]
 
 
-urlpatterns = [
-    ...  # Existing URL patterns
-    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
-]
