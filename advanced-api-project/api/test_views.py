@@ -20,8 +20,11 @@ class BookAPITestCase(TestCase):
             'publication_year': 2022,
             'author': self.author.id
         }
-        response = self.client.post('/books/create/', data)
+        response = self.client.post('/books/create/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], 'New Book')
+        self.assertEqual(response.data['publication_year'], 2022)
+        self.assertEqual(response.data['author'], self.author.id)
 
     def test_update_book(self):
         data = {
@@ -29,17 +32,28 @@ class BookAPITestCase(TestCase):
             'publication_year': 2021,
             'author': self.author.id
         }
-        response = self.client.put(f'/books/update/{self.book.id}/', data)
+        response = self.client.put(f'/books/update/{self.book.id}/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], 'Updated Book')
+        self.assertEqual(response.data['publication_year'], 2021)
+        self.assertEqual(response.data['author'], self.author.id)
 
     def test_delete_book(self):
         response = self.client.delete(f'/books/delete/{self.book.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+        # Verify that the book is actually deleted
+        response = self.client.get(f'/books/{self.book.id}/')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_get_books(self):
         response = self.client.get('/books/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('results', response.data)  # Ensure the response contains a 'results' key
 
     def test_get_book_detail(self):
         response = self.client.get(f'/books/{self.book.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], 'Test Book')
+        self.assertEqual(response.data['publication_year'], 2020)
+        self.assertEqual(response.data['author'], self.author.id)
