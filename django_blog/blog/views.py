@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect 
-from .models import Post 
+from .models import Post, Comment 
 from django.contrib.auth import login, authenticate, logout 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User 
 from .forms import UserRegisterForm, UserUpdateForm 
 from django.contrib import messages
-from .forms import PostForm 
+from .forms import PostForm, CommentForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
 
 def register(request):
     if request.method =='POST':
@@ -60,6 +61,50 @@ class PostListView(ListView):
 class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment_form'] = CommentForm()
+        context['comments'] = self.object.comments.all()
+        return context
+    
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def form_valid(self, form):
+        # Set the author and post fields before saving
+        form.instance.author = self.request.user
+        form.instance.post = self.get_post()
+        return super().form_valid(form)
+
+    def get_post(self):
+        return Post.objects.get(pk=self.kwargs['post_id'])
+
+    def get_success_url(self):
+        # Use reverse_lazy to generate the URL
+        return reverse_lazy('post-detail', kwargs={'pk': self.kwargs['post_id']})
+
+class CommentUpdateView(LoginRequiredMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+
+    def get_success_url(self):
+        return redirect('post_detail', pk=self.object.post_id)
+
+    def get_queryset(self):
+        return Comment.objects.filter(author=self.request.user)
+
+class CommentDeleteView(LoginRequiredMixin, DeleteView):
+    model = Comment
+
+    def get_success_url(self):
+        return redirect('post_detail', pk=self.object.post_id)
+
+    def get_queryset(self):
+        return Comment.objects.filter(author=self.request.user)
+
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
