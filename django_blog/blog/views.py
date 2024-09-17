@@ -13,6 +13,8 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Q 
 from taggit.models import Tag
+from .forms import UserUpdateForm, ProfileUpdateForm
+
 
 def register(request):
     if request.method =='POST':
@@ -30,16 +32,23 @@ def register(request):
 @login_required
 def profile(request):
     if request.method == 'POST':
-         u_form = UserUpdateForm(request.POST, instance=request.user)
-         if u_form.is_valid():
-            u_form.save()
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
     else:
-        u_form = UserUpdateForm(instance=request.user)
-    
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+
     context = {
-        'u_form': u_form
+        'user_form': user_form,
+        'profile_form': profile_form
     }
+
     return render(request, 'blog/profile.html', context)
 
 @login_required

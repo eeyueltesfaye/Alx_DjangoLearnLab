@@ -22,3 +22,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('blog/', include('blog.urls')),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:  # Only serve media files during development
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
