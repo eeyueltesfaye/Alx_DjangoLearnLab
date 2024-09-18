@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer, CustomUserSerializer
 from .models import CustomUser
 
 User = get_user_model()
@@ -28,10 +28,10 @@ class LoginView(ObtainAuthToken):
 
 class UserDetailView(generics.RetrieveAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = CustomUserSerializer
 
 class UserListView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = CustomUserSerializer
     
 
