@@ -1,0 +1,10 @@
+Django>=4.0,<5.0
+djangorestframework>=3.12,<4.0
+psycopg2-binary  # For PostgreSQL; use mysqlclient for MySQL
+djangorestframework-simplejwt  # For JWT authentication
+django-cors-headers  # For handling CORS
+django-filter  # For filtering capabilities
+Pillow  # For image processing
+gunicorn  # WSGI server for deployment
+whitenoise  # For serving static files in production
+django-taggit  # For tagging functionality
