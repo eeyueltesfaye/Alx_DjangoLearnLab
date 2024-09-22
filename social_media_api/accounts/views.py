@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, permissions
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -63,7 +63,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 # Follow user view
 class FollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # Ensure the user is authenticated
+    queryset = CustomUser.objects.all()  # Define the queryset
     serializer_class = UserSerializer
 
     def post(self, request, *args, **kwargs):
@@ -76,7 +77,8 @@ class FollowUserView(generics.GenericAPIView):
 
 # Unfollow user view
 class UnfollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # Ensure the user is authenticated
+    queryset = CustomUser.objects.all()  # Define the queryset
     serializer_class = UserSerializer
 
     def post(self, request, *args, **kwargs):
@@ -85,5 +87,3 @@ class UnfollowUserView(generics.GenericAPIView):
             request.user.following.remove(user_to_unfollow)
             return Response({'status': 'unfollowed'}, status=status.HTTP_200_OK)
         return Response({'error': 'You cannot unfollow yourself'}, status=status.HTTP_400_BAD_REQUEST)
-    
-
