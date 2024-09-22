@@ -8,6 +8,8 @@ from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
+
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
@@ -19,6 +21,32 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    @action(detail=True, methods=['POST'])
+    def like(self, request, pk=None):
+        post = generics.get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+        if created:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target=post
+            )
+            return Response({'status': 'post liked'}, status=status.HTTP_201_CREATED)
+        
+        return Response({'status': 'post already liked'}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'])
+    def unlike(self, request, pk=None):
+        post = generics.get_object_or_404(Post, pk=pk)
+
+        try:
+            like = Like.objects.get(user=request.user, post=post)
+            like.delete()
+            return Response({'status': 'post unliked'}, status=status.HTTP_200_OK)
+        except Like.DoesNotExist:
+            return Response({'status': 'post not liked'}, status=status.HTTP_400_BAD_REQUEST)
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('-created_at')
     serializer_class = CommentSerializer
@@ -38,35 +66,25 @@ class UserFeedView(generics.ListAPIView):
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
     
 
-class LikePostView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, pk, format=None):
-        # Use generics.get_object_or_404 to get the Post
+@action(detail=True, methods=['POST'])
+def like(self, request, pk=None):
         post = generics.get_object_or_404(Post, pk=pk)
-        user = request.user
-
-        # Use Like.objects.get_or_create to like the post if not already liked
-        like, created = Like.objects.get_or_create(user=user, post=post)
-
+        _, created = Like.objects.get_or_create(user=request.user, post=post)
         if created:
-            return Response({"detail": "Post liked."}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"detail": "You have already liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target=post
+            )
+            return Response({'status': 'post liked'}, status=status.HTTP_201_CREATED)
+        return Response({'status': 'post already liked'}, status=status.HTTP_200_OK)
 
-class UnlikePostView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, pk, format=None):
-        # Use generics.get_object_or_404 to get the Post
+@action(detail=True, methods=['POST'])
+def unlike(self, request, pk=None):
         post = generics.get_object_or_404(Post, pk=pk)
-        user = request.user
-
-        # Check if the Like exists
-        like = Like.objects.filter(user=user, post=post).first()
-
+        like = Like.objects.filter(user=request.user, post=post).first()
         if like:
             like.delete()
-            return Response({"detail": "Post unliked."}, status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response({"detail": "You have not liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'post unliked'}, status=status.HTTP_200_OK)
+        return Response({'status': 'post not liked'}, status=status.HTTP_400_BAD_REQUEST)
