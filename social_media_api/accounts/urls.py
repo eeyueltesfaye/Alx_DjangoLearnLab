@@ -11,7 +11,7 @@ urlpatterns = [
     path('user/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
     path('users/', UserListView.as_view(), name='user-list'),
     path('', include(router.urls)),
-    path('users/<int:pk>/follow/', FollowUserView.as_view(), name='follow-user'),
-    path('users/<int:pk>/unfollow/', UnfollowUserView.as_view(), name='unfollow-user'),
+    path('follow/<int:user_id>//', FollowUserView.as_view(), name='follow-user'),
+    path('unfollow/<int:user_id>/', UnfollowUserView.as_view(), name='unfollow-user'),
 
 ]
