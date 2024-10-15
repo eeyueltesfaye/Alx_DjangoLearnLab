@@ -10,7 +10,7 @@
 - [Deployment](#deployment)
 - [Testing](#testing)
 - [Contributing](#contributing)
-- [License](#license)
+
 
 ## Project Overview
 The Social Media API is a robust backend solution designed for a social media platform, built using Django and Django REST Framework. This API allows users to create, view, like, comment on posts, follow other users, and receive notifications. It provides a comprehensive and scalable structure for developing social networking applications.
@@ -105,9 +105,6 @@ To run tests, execute the following command:
 Contributing
 Contributions are welcome! Please fork the repository and submit a pull request. Ensure your code adheres to the project's style guidelines.
 
-License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
 
 Feel free to modify any section to better fit your project’s specifics!
 
